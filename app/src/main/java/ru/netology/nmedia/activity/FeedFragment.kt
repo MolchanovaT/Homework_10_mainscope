@@ -90,8 +90,8 @@ class FeedFragment : Fragment() {
 
         binding.fabNewPosts.setOnClickListener {
             viewModel.showNewPosts()
-            binding.list.smoothScrollBy(0, 0)
             binding.fabNewPosts.isVisible = false
+            binding.list.smoothScrollBy(0, 0)
         }
 
         return binding.root
