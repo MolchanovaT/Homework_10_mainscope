@@ -8,6 +8,10 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.asFlow
+import androidx.lifecycle.map
+import androidx.lifecycle.switchMap
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
@@ -15,7 +19,10 @@ import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.viewmodel.PostViewModel
+import java.lang.reflect.Array.get
+import kotlin.math.absoluteValue
 
 class FeedFragment : Fragment() {
 
@@ -75,6 +82,16 @@ class FeedFragment : Fragment() {
 
         binding.fab.setOnClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+        }
+
+        viewModel.newerCount.observe(viewLifecycleOwner, {
+            binding.fabNewPosts.isVisible = it > 0
+        })
+
+        binding.fabNewPosts.setOnClickListener {
+            viewModel.showNewPosts()
+            binding.list.smoothScrollBy(0, 0)
+            binding.fabNewPosts.isVisible = false
         }
 
         return binding.root
