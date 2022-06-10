@@ -5,24 +5,20 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.net.toFile
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.asFlow
-import androidx.lifecycle.map
-import androidx.lifecycle.switchMap
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
+import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.OnInteractionListener
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.viewmodel.PostViewModel
-import java.lang.reflect.Array.get
-import kotlin.math.absoluteValue
 
 class FeedFragment : Fragment() {
 
@@ -59,6 +55,12 @@ class FeedFragment : Fragment() {
                 val shareIntent =
                     Intent.createChooser(intent, getString(R.string.chooser_share_post))
                 startActivity(shareIntent)
+            }
+
+            override fun onPhoto(post: Post) {
+                val myUri = "${BuildConfig.BASE_URL}/media/${post.attachment?.url}".toUri()
+                viewModel.changePhoto(myUri, null)
+                findNavController().navigate(R.id.action_feedFragment_to_imageFragment)
             }
         })
         binding.list.adapter = adapter
