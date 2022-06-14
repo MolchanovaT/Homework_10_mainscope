@@ -10,6 +10,7 @@ import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.view.load
 import ru.netology.nmedia.view.loadCircleCrop
 
 interface OnInteractionListener {
@@ -17,6 +18,7 @@ interface OnInteractionListener {
     fun onEdit(post: Post) {}
     fun onRemove(post: Post) {}
     fun onShare(post: Post) {}
+    fun onPhoto(post: Post) {}
 }
 
 class PostsAdapter(
@@ -46,6 +48,11 @@ class PostViewHolder(
             avatar.loadCircleCrop("${BuildConfig.BASE_URL}/avatars/${post.authorAvatar}")
             like.isChecked = post.likedByMe
             like.text = "${post.likes}"
+            photo.load("${BuildConfig.BASE_URL}/media/${post.attachment?.url}")
+
+            photo.setOnClickListener {
+                onInteractionListener.onPhoto(post)
+            }
 
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
