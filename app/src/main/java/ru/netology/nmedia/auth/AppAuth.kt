@@ -1,4 +1,3 @@
-/*
 package ru.netology.nmedia.auth
 
 import android.content.Context
@@ -90,8 +89,9 @@ class AppAuth private constructor(context: Context) {
     }
 }
 
-data class AuthState(val id: Long = 0, val token: String? = null)*/
+data class AuthState(val id: Long = 0, val token: String? = null)
 
+/*
 package ru.netology.nmedia.auth
 
 import android.content.Context
@@ -159,3 +159,4 @@ class AppAuth private constructor(context: Context) {
 }
 
 data class AuthState(val id: Long = 0, val token: String? = null)
+*/

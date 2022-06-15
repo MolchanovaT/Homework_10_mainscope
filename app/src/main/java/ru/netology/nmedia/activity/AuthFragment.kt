@@ -30,8 +30,8 @@ class AuthFragment : Fragment() {
 
         binding.auth.setOnClickListener {
             viewModel.updateUser(
-                binding.login.text.toString(),
-                binding.password.text.toString()
+                binding.login.editText?.text.toString(),
+                binding.password.editText?.text.toString()
             )
             findNavController().navigateUp()
         }
