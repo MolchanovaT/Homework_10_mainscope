@@ -58,11 +58,8 @@ class FCMService : FirebaseMessagingService() {
         val notification = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(
-                getString(
-                    R.string.notification,
                     content
                 )
-            )
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .build()
 
