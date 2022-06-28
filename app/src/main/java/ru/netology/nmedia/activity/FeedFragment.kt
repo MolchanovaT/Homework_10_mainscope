@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -64,6 +63,7 @@ class FeedFragment : Fragment() {
             }
         })
         binding.list.adapter = adapter
+
         viewModel.dataState.observe(viewLifecycleOwner, { state ->
             binding.progress.isVisible = state.loading
             binding.swiperefresh.isRefreshing = state.refreshing
@@ -73,6 +73,7 @@ class FeedFragment : Fragment() {
                     .show()
             }
         })
+
         viewModel.data.observe(viewLifecycleOwner, { state ->
             adapter.submitList(state.posts)
             binding.emptyText.isVisible = state.empty
@@ -86,7 +87,7 @@ class FeedFragment : Fragment() {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
 
-        viewModel.newerCount.observe(viewLifecycleOwner, {
+        /*viewModel.newerCount.observe(viewLifecycleOwner, {
             binding.fabNewPosts.isVisible = it > 0
         })
 
@@ -94,6 +95,11 @@ class FeedFragment : Fragment() {
             viewModel.showNewPosts()
             binding.fabNewPosts.isVisible = false
             binding.list.smoothScrollBy(0, 0)
+        }*/
+
+        viewModel.newerCount.observe(viewLifecycleOwner) { state ->
+            // TODO: just log it, interaction must be in homework
+            println(state)
         }
 
         return binding.root
