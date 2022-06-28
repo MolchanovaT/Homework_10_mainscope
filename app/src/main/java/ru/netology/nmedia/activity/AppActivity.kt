@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.installations.FirebaseInstallations
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.auth.AppAuth
@@ -45,6 +45,16 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
             invalidateOptionsMenu()
         }
 
+        FirebaseInstallations.getInstance().id.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                println("some stuff happened: ${task.exception}")
+                return@addOnCompleteListener
+            }
+
+            val token = task.result
+            println(token)
+        }
+
         checkGoogleApiAvailability()
     }
 
@@ -64,7 +74,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                 // TODO: just hardcode it, implementation must be in homework
                 findNavController(R.id.nav_host_fragment)
                     .navigate(
-                        R.id.action_feedFragment_to_authFragment,
+                        R.id.authFragment,
                     )
                 //AppAuth.getInstance().setAuth(5, "x-token")
                 true
@@ -73,7 +83,7 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                 // TODO: just hardcode it, implementation must be in homework
                 findNavController(R.id.nav_host_fragment)
                     .navigate(
-                        R.id.action_feedFragment_to_authFragment,
+                        R.id.authFragment,
                     )
                 //AppAuth.getInstance().setAuth(5, "x-token")
                 true
@@ -101,8 +111,8 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
                 .show()
         }
 
-        FirebaseMessaging.getInstance().token.addOnSuccessListener {
+        /*FirebaseMessaging.getInstance().token.addOnSuccessListener {
             println(it)
-        }
+        }*/
     }
 }
