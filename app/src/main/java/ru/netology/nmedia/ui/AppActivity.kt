@@ -1,6 +1,7 @@
 package ru.netology.nmedia.ui
 
 import android.content.Intent
+import android.nfc.NfcAdapter
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -13,6 +14,7 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
+import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.ui.NewPostFragment.Companion.textArg
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.viewmodel.AuthViewModel
@@ -20,6 +22,9 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class AppActivity : AppCompatActivity(R.layout.activity_app) {
+    @Inject
+    lateinit var repository: PostRepository
+
     @Inject
     lateinit var auth: AppAuth
     private val viewModel: AuthViewModel by viewModels()
@@ -84,20 +89,20 @@ class AppActivity : AppCompatActivity(R.layout.activity_app) {
         return when (item.itemId) {
             R.id.signin -> {
                 // TODO: just hardcode it, implementation must be in homework
-                findNavController(R.id.nav_host_fragment)
+                /*findNavController(R.id.nav_host_fragment)
                     .navigate(
                         R.id.authFragment,
-                    )
-                //AppAuth.getInstance().setAuth(5, "x-token")
+                    )*/
+                auth.setAuth(5, "x-token")
                 true
             }
             R.id.signup -> {
                 // TODO: just hardcode it, implementation must be in homework
-                findNavController(R.id.nav_host_fragment)
+                /*findNavController(R.id.nav_host_fragment)
                     .navigate(
                         R.id.authFragment,
-                    )
-                //AppAuth.getInstance().setAuth(5, "x-token")
+                    )*/
+                auth.setAuth(5, "x-token")
                 true
             }
             R.id.signout -> {

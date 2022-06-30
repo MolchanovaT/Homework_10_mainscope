@@ -4,8 +4,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.paging.PagingDataAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.R
@@ -24,78 +24,80 @@ interface OnInteractionListener {
 
 class PostsAdapter(
     private val onInteractionListener: OnInteractionListener,
-) : ListAdapter<Post, PostViewHolder>(PostDiffCallback()) {
+) : PagingDataAdapter<Post, PostsAdapter.PostViewHolder>(PostDiffCallback()) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val binding = CardPostBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return PostViewHolder(binding, onInteractionListener)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
-        val post = getItem(position)
-        holder.bind(post)
+        // FIXME: students will do in HW
+        getItem(position)?.let {
+            holder.bind(it)
+        }
     }
-}
 
-class PostViewHolder(
-    private val binding: CardPostBinding,
-    private val onInteractionListener: OnInteractionListener,
-) : RecyclerView.ViewHolder(binding.root) {
+    class PostViewHolder(
+        private val binding: CardPostBinding,
+        private val onInteractionListener: OnInteractionListener,
+    ) : RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(post: Post) {
-        binding.apply {
-            author.text = post.author
-            published.text = post.published
-            content.text = post.content
-            avatar.loadCircleCrop("${BuildConfig.BASE_URL}/avatars/${post.authorAvatar}")
-            like.isChecked = post.likedByMe
-            like.text = "${post.likes}"
-            photo.load("${BuildConfig.BASE_URL}/media/${post.attachment?.url}")
+        fun bind(post: Post) {
+            binding.apply {
+                author.text = post.author
+                published.text = post.published
+                content.text = post.content
+                avatar.loadCircleCrop("${BuildConfig.BASE_URL}/avatars/${post.authorAvatar}")
+                like.isChecked = post.likedByMe
+                like.text = "${post.likes}"
+                photo.load("${BuildConfig.BASE_URL}/media/${post.attachment?.url}")
 
-            photo.setOnClickListener {
-                onInteractionListener.onPhoto(post)
-            }
+                photo.setOnClickListener {
+                    onInteractionListener.onPhoto(post)
+                }
 
-            menu.visibility = if (post.ownedByMe) View.VISIBLE else View.INVISIBLE
+                menu.visibility = if (post.ownedByMe) View.VISIBLE else View.INVISIBLE
 
-            menu.setOnClickListener {
-                PopupMenu(it.context, it).apply {
-                    inflate(R.menu.options_post)
-                    // TODO: if we don't have other options, just remove dots
-                    menu.setGroupVisible(R.id.owned, post.ownedByMe)
-                    setOnMenuItemClickListener { item ->
-                        when (item.itemId) {
-                            R.id.remove -> {
-                                onInteractionListener.onRemove(post)
-                                true
+                menu.setOnClickListener {
+                    PopupMenu(it.context, it).apply {
+                        inflate(R.menu.options_post)
+                        // TODO: if we don't have other options, just remove dots
+                        menu.setGroupVisible(R.id.owned, post.ownedByMe)
+                        setOnMenuItemClickListener { item ->
+                            when (item.itemId) {
+                                R.id.remove -> {
+                                    onInteractionListener.onRemove(post)
+                                    true
+                                }
+                                R.id.edit -> {
+                                    onInteractionListener.onEdit(post)
+                                    true
+                                }
+
+                                else -> false
                             }
-                            R.id.edit -> {
-                                onInteractionListener.onEdit(post)
-                                true
-                            }
-
-                            else -> false
                         }
-                    }
-                }.show()
-            }
+                    }.show()
+                }
 
-            like.setOnClickListener {
-                onInteractionListener.onLike(post)
-            }
+                like.setOnClickListener {
+                    onInteractionListener.onLike(post)
+                }
 
-            share.setOnClickListener {
-                onInteractionListener.onShare(post)
+                share.setOnClickListener {
+                    onInteractionListener.onShare(post)
+                }
             }
         }
     }
-}
 
-class PostDiffCallback : DiffUtil.ItemCallback<Post>() {
-    override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
-        return oldItem.id == newItem.id
-    }
+    class PostDiffCallback : DiffUtil.ItemCallback<Post>() {
+        override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
+            return oldItem.id == newItem.id
+        }
 
-    override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean {
-        return oldItem == newItem
+        override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean {
+            return oldItem == newItem
+        }
     }
 }
