@@ -6,12 +6,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
+import androidx.paging.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.auth.AppAuth
@@ -47,10 +47,19 @@ class PostViewModel @Inject constructor(
     auth: AppAuth,
 ) : ViewModel() {
 
-    val data: Flow<PagingData<Post>> = Pager(
+    private val dataAuth: Flow<PagingData<Post>> = Pager(
         config = PagingConfig(pageSize = 5, enablePlaceholders = false),
         pagingSourceFactory = { PostPagingSource(apiService) },
     ).flow
+
+    val data: Flow<PagingData<Post>> = auth.authStateFlow
+        .flatMapLatest { (myId, _) ->
+            dataAuth.map { pagingData ->
+                pagingData.map { post ->
+                    post.copy(ownedByMe = post.authorId == myId)
+                }
+            }
+        }
 
     /*private val cached = repository
         .data
