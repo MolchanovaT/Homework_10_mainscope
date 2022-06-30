@@ -51,7 +51,6 @@ class PostViewModel @Inject constructor(
         config = PagingConfig(pageSize = 5, enablePlaceholders = false),
         pagingSourceFactory = { PostPagingSource(apiService) },
     ).flow
-    //adapter.refresh()
 
     /*private val cached = repository
         .data
