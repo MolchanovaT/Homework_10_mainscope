@@ -2,25 +2,21 @@ package ru.netology.nmedia.viewmodel
 
 import android.net.Uri
 import androidx.core.net.toFile
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import androidx.paging.*
+import androidx.lifecycle.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import ru.netology.nmedia.api.ApiService
+import kotlinx.coroutines.withContext
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.PhotoModel
-import ru.netology.nmedia.repository.PostPagingSource
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
@@ -43,47 +39,30 @@ private val noPhoto = PhotoModel()
 @HiltViewModel
 class PostViewModel @Inject constructor(
     private val repository: PostRepository,
-    private val apiService: ApiService,
     auth: AppAuth,
 ) : ViewModel() {
 
-    private val dataAuth: Flow<PagingData<Post>> = Pager(
-        config = PagingConfig(pageSize = 5, enablePlaceholders = false),
-        pagingSourceFactory = { PostPagingSource(apiService) },
-    ).flow
-
-    val data: Flow<PagingData<Post>> = auth.authStateFlow
+    val data: LiveData<FeedModel> = auth.authStateFlow
         .flatMapLatest { (myId, _) ->
-            dataAuth.map { pagingData ->
-                pagingData.map { post ->
-                    post.copy(ownedByMe = post.authorId == myId)
+            repository.data
+                .map { posts ->
+                    FeedModel(
+                        posts.map { it.copy(ownedByMe = it.authorId == myId) },
+                        posts.isEmpty()
+                    )
                 }
-            }
-        }
-
-    /*private val cached = repository
-        .data
-        .cachedIn(viewModelScope)
-
-    val data: Flow<PagingData<Post>> = auth.authStateFlow
-        .flatMapLatest { (myId, _) ->
-            cached.map { pagingData ->
-                pagingData.map { post ->
-                    post.copy(ownedByMe = post.authorId == myId)
-                }
-            }
-        }*/
+        }.asLiveData(Dispatchers.Default)
 
     private val _data = MutableLiveData(FeedModel())
     private val _dataState = MutableLiveData<FeedModelState>()
     val dataState: LiveData<FeedModelState>
         get() = _dataState
 
-    /*val newerCount: LiveData<Int> = data.switchMap {
+    val newerCount: LiveData<Int> = data.switchMap {
         repository.getNewerCount(it.posts.firstOrNull()?.id ?: 0L)
             .catch { e -> e.printStackTrace() }
             .asLiveData(Dispatchers.Default)
-    }*/
+    }
 
     private val edited = MutableLiveData(empty)
     private val _postCreated = SingleLiveEvent<Unit>()
@@ -98,10 +77,10 @@ class PostViewModel @Inject constructor(
         loadPosts()
     }
 
-    private fun loadPosts() = viewModelScope.launch {
+    fun loadPosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(loading = true)
-            // repository.stream.cachedIn(viewModelScope).
+            repository.getAll()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
             _dataState.value = FeedModelState(error = true)
@@ -111,14 +90,14 @@ class PostViewModel @Inject constructor(
     fun refreshPosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(refreshing = true)
-//            repository.getAll()
+            repository.getAll()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
             _dataState.value = FeedModelState(error = true)
         }
     }
 
-    /*fun showNewPosts() = viewModelScope.launch {
+    fun showNewPosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(refreshing = true)
             withContext(Dispatchers.Default) {
@@ -128,7 +107,7 @@ class PostViewModel @Inject constructor(
         } catch (e: Exception) {
             _dataState.value = FeedModelState(error = true)
         }
-    }*/
+    }
 
     fun save() {
         edited.value?.let {
