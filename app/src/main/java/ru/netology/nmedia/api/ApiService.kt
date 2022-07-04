@@ -54,9 +54,6 @@ interface ApiService {
     @GET("posts/latest")
     suspend fun getLatest(@Query("count") count: Int): Response<List<Post>>
 
-    @GET("posts/{id}")
-    suspend fun getById(@Path("id") id: Long): Response<Post>
-
     @POST("posts")
     suspend fun save(@Body post: Post): Response<Post>
 

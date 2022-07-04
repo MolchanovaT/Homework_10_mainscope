@@ -26,7 +26,6 @@ class ImageFragment : Fragment() {
             container,
             false
         )
-        fragmentBinding = binding
 
         viewModel.photo.observe(viewLifecycleOwner) {
             binding.photo.load(it.uri.toString())
