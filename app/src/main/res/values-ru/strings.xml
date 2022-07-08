@@ -33,4 +33,5 @@
     <string name="login">Логин</string>
     <string name="password">Пароль</string>
     <string name="notification">Новое уведомление</string>
+    <string name="ad_description">Реклама</string>
 </resources>
