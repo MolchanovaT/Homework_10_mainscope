@@ -26,7 +26,6 @@ class AuthFragment : Fragment() {
             container,
             false
         )
-        fragmentBinding = binding
 
         binding.auth.setOnClickListener {
             viewModel.updateUser(
